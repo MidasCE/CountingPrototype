@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ProbsSpawnManager : MonoBehaviour
@@ -13,32 +14,47 @@ public class ProbsSpawnManager : MonoBehaviour
     private const float SpawnIntervalMax = 2f;
     
     
-    private Coroutine spawnCoroutine;
+    private Coroutine _spawnCoroutine;
+    private readonly List<GameObject> _spawnedObjects = new();
     
     public void StartSpawning()
     {
-        spawnCoroutine = StartCoroutine(SpawnRandomProbs());
+        _spawnCoroutine = StartCoroutine(SpawnRandomProbs());
     }
 
-    IEnumerator SpawnRandomProbs()
+    private IEnumerator SpawnRandomProbs()
     {
-        float spawnInterval = Random.Range(SpawnIntervalMin, SpawnIntervalMax);
-        yield return new WaitForSeconds(spawnInterval);
-        
-        int index = Random.Range(0, probPrefabs.Length);
-        // Generate random ball index and random spawn position
-        Vector3 spawnPos = new Vector3(0, SpawnPosY, Random.Range(spawnLimitZLeft, spawnLimitZRight));
+        while (true)
+        {
+            float spawnInterval = Random.Range(SpawnIntervalMin, SpawnIntervalMax);
+            yield return new WaitForSeconds(spawnInterval);
 
-        // instantiate ball at random spawn location
-        GameObject spawnedObject = Instantiate(probPrefabs[index], spawnPos, probPrefabs[index].transform.rotation);
+            if (_spawnedObjects.Count >= 10)
+            {
+                foreach (GameObject child in _spawnedObjects)
+                {
+                    Destroy(child);
+                }
+                _spawnedObjects.Clear();
+            }
         
-        // Set this GameObject as the parent
-        spawnedObject.transform.SetParent(transform);
+            int index = Random.Range(0, probPrefabs.Length);
+            // Generate random ball index and random spawn position
+            Vector3 spawnPos = new Vector3(0, SpawnPosY, Random.Range(spawnLimitZLeft, spawnLimitZRight));
+
+            // instantiate ball at random spawn location
+            GameObject spawnedObject = Instantiate(probPrefabs[index], spawnPos, probPrefabs[index].transform.rotation);
+        
+            // Set this GameObject as the parent
+            spawnedObject.transform.SetParent(transform);
+        
+            _spawnedObjects.Add(spawnedObject);
+        }
     }
     
     public void StopSpawning()
     {
-        StopCoroutine(spawnCoroutine);
+        StopCoroutine(_spawnCoroutine);
     }
     
     public void DestroyAllChildren()
