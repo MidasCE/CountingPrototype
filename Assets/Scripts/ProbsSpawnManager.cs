@@ -4,15 +4,14 @@ using UnityEngine;
 
 public class ProbsSpawnManager : MonoBehaviour
 {
-    public float spawnLimitZLeft =-5;
-    public float spawnLimitZRight = 5;
+    public float spawnLimitZLeft = -4;
+    public float spawnLimitZRight = 4;
     
     private const float SpawnPosY = 4;
     public GameObject[] probPrefabs;
     
     private const float SpawnIntervalMin = 1f;
     private const float SpawnIntervalMax = 2f;
-    
     
     private Coroutine _spawnCoroutine;
     private readonly List<GameObject> _spawnedObjects = new();
@@ -31,11 +30,8 @@ public class ProbsSpawnManager : MonoBehaviour
 
             if (_spawnedObjects.Count >= 10)
             {
-                foreach (GameObject child in _spawnedObjects)
-                {
-                    Destroy(child);
-                }
-                _spawnedObjects.Clear();
+                Destroy(_spawnedObjects[0]);
+                _spawnedObjects.RemoveAt(0);
             }
         
             int index = Random.Range(0, probPrefabs.Length);
@@ -59,9 +55,11 @@ public class ProbsSpawnManager : MonoBehaviour
     
     public void DestroyAllChildren()
     {
-        foreach (Transform child in transform)
+        foreach (GameObject child in _spawnedObjects)
         {
-            Destroy(child.gameObject);
+            Destroy(child);
         }
+        _spawnedObjects.Clear();
     }
+    
 }
